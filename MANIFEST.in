@@ -1,0 +1,4 @@
+include LICENSE README.md Makefile
+include mypy.ini .coveragerc .isort.cfg .pylintrc .style.yapf
+recursive-include requirements *
+recursive-include tests *

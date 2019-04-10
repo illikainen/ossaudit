@@ -1,0 +1,7 @@
+[run]
+branch = true
+source = ossaudit
+omit = ossaudit/__main__.py
+
+[report]
+fail_under = 100

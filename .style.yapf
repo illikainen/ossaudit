@@ -1,0 +1,8 @@
+[style]
+based_on_style = pep8
+blank_line_before_module_docstring = true
+coalesce_brackets = true
+dedent_closing_brackets = true
+join_multiple_lines = false
+split_before_first_argument = true
+split_complex_comprehension = true
