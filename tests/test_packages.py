@@ -7,6 +7,9 @@
 import io
 import json
 from unittest import TestCase
+from unittest.mock import patch
+
+import pkg_resources
 
 from ossaudit import packages
 
@@ -139,3 +142,23 @@ class TestGetFromFiles(TestCase):
         got = [p.coordinate for p in packages.get_from_files([rf, pf, tf])]
         want = ["pkg:pypi/{}".format(x) for x in [y for *_, y in r + p + t]]
         self.assertEqual(sorted(got), sorted(want))
+
+
+class TestGetInstalled(TestCase):
+    def test_installed(self) -> None:
+        pkgs = [
+            ("pylint", "0rc2", "pylint@0"),
+            ("pytest", "1.2.3", "pytest@1.2.3"),
+            ("pytz", "2018.12", "pytz@2018.12"),
+            ("requests", "5.6.7rc1", "requests@5.6.6"),
+            ("tox", "1.9.0rc7", "tox@1.8.9"),
+        ]
+
+        with patch("pkg_resources.working_set") as mock:
+            mock.__iter__.return_value = [
+                pkg_resources.Distribution(project_name=n, version=v)
+                for n, v, _ in pkgs
+            ]
+            got = [p.coordinate for p in packages.get_installed()]
+            want = ["pkg:pypi/{}".format(p) for *_, p in pkgs]
+            self.assertEqual(sorted(got), sorted(want))

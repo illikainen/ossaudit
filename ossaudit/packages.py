@@ -2,10 +2,12 @@
 #
 # SPDX-License-Identifier: BSD-2-Clause
 
+import io
 from typing import IO, List
 
 import dparse
 import packaging.version
+import pkg_resources
 
 
 class Package:
@@ -118,3 +120,15 @@ def get_from_files(fhs: List[IO[str]]) -> List[Package]:
             version = min(versions or [_Version("0")])
             pkgs.append(Package(dep.name, version.base_version))
     return pkgs
+
+
+def get_installed() -> List[Package]:
+    """
+    Retrieve installed packages.
+    """
+    requirements = "\n".join(
+        str(p.as_requirement()) for p in iter(pkg_resources.working_set)
+    )
+    f = io.StringIO(requirements)
+    f.name = "requirements.txt"
+    return get_from_files([f])
