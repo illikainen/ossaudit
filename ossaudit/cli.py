@@ -21,7 +21,11 @@ def cli(installed: bool, files: List[IO]) -> None:
     if files:
         pkgs += packages.get_from_files(files)
 
-    vulns = audit.components(pkgs)
+    try:
+        vulns = audit.components(pkgs)
+    except audit.AuditError as e:
+        raise click.ClickException(str(e))
+
     if vulns:
         size = shutil.get_terminal_size()
         table = texttable.Texttable(max_width=size.columns)

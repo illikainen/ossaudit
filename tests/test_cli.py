@@ -8,7 +8,7 @@ from unittest.mock import patch
 
 from click.testing import CliRunner
 
-from ossaudit import cli, packages
+from ossaudit import audit, cli, packages
 
 
 class TestCli(TestCase):
@@ -73,3 +73,13 @@ class TestCli(TestCase):
                         )
                         self.assertEqual(result.exit_code, 0)
                         components.assert_called_with(installed + files)
+
+    def test_audit_error(self) -> None:
+        with patch("ossaudit.packages.get_installed") as get_installed:
+            get_installed.return_value = []
+            with patch("ossaudit.audit.components") as components:
+                components.side_effect = audit.AuditError("xyz")
+                runner = CliRunner()
+                result = runner.invoke(cli.cli, ["--installed"])
+                self.assertTrue("xyz" in result.output)
+                self.assertNotEqual(result.exit_code, 0)
