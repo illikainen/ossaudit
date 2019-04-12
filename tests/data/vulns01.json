@@ -1,0 +1,49 @@
+[
+  {
+    "reference": "https://ossindex.sonatype.org/component/pkg:pypi/django@2.2",
+    "description": "A high-level Python Web framework that encourages rapid development and clean, pragmatic design.",
+    "coordinates": "pkg:pypi/django@2.2",
+    "vulnerabilities": []
+  },
+  {
+    "reference": "https://ossindex.sonatype.org/component/pkg:pypi/requests@0.10.0",
+    "description": "Python HTTP for Humans.",
+    "coordinates": "pkg:pypi/requests@0.10.0",
+    "vulnerabilities": [
+      {
+        "reference": "https://ossindex.sonatype.org/vuln/5ec41929-01e3-4daa-b140-a1021b6abf86",
+        "cve": "CVE-2014-1830",
+        "title": "[CVE-2014-1830]  Information Exposure",
+        "cvssScore": 5.0,
+        "id": "5ec41929-01e3-4daa-b140-a1021b6abf86",
+        "description": "Requests (aka python-requests) before 2.3.0 allows remote servers to obtain sensitive information by reading the Proxy-Authorization header in a redirected request.",
+        "cvssVector": "AV:N/AC:L/Au:N/C:P/I:N/A:N"
+      },
+      {
+        "reference": "https://ossindex.sonatype.org/vuln/b3caedce-8e58-4cdd-a104-ef781752d9f8",
+        "cve": "CVE-2014-1829",
+        "title": "[CVE-2014-1829]  Information Exposure",
+        "cvssScore": 5.0,
+        "id": "b3caedce-8e58-4cdd-a104-ef781752d9f8",
+        "description": "Requests (aka python-requests) before 2.3.0 allows remote servers to obtain a netrc password by reading the Authorization header in a redirected request.",
+        "cvssVector": "AV:N/AC:L/Au:N/C:P/I:N/A:N"
+      }
+    ]
+  },
+  {
+    "reference": "https://ossindex.sonatype.org/component/pkg:pypi/pyyaml@3.13",
+    "description": "YAML parser and emitter for Python",
+    "coordinates": "pkg:pypi/pyyaml@3.13",
+    "vulnerabilities": [
+      {
+        "reference": "https://ossindex.sonatype.org/vuln/8d14381a-93f1-46ac-9027-d8fea9b7874e",
+        "cve": "CVE-2017-18342",
+        "title": "[CVE-2017-18342]  Improper Input Validation",
+        "cvssScore": 9.8,
+        "id": "8d14381a-93f1-46ac-9027-d8fea9b7874e",
+        "description": "In PyYAML before 4.1, the yaml.load() API could execute arbitrary code. In other words, yaml.safe_load is not used.",
+        "cvssVector": "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H"
+      }
+    ]
+  }
+]
