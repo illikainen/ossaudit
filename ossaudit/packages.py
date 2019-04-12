@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 
 import io
+import warnings
 from typing import IO, List
 
 import dparse
@@ -107,7 +108,11 @@ def get_from_files(fhs: List[IO[str]]) -> List[Package]:
     """
     pkgs = []
     for f in fhs:
-        for dep in dparse.parse(f.read(), path=f.name).dependencies:
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore", category=DeprecationWarning)
+            dependencies = dparse.parse(f.read(), path=f.name).dependencies
+
+        for dep in dependencies:
             versions = []
             for spec in dep.specs:
                 if spec.operator in ["==", "~=", ">=", ">"]:
