@@ -3,3 +3,4 @@
 # SPDX-License-Identifier: BSD-2-Clause
 
 __version__ = "0.0.0"
+__project__ = "ossaudit"

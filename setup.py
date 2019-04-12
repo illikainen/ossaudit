@@ -21,7 +21,7 @@ def get_requirements(filename: str) -> Iterator[str]:
 
 
 setup(
-    name="ossaudit",
+    name=ossaudit.__project__,
     version=ossaudit.__version__,
     author="Hans Jerry Illikainen",
     author_email="hji@dyntopia.com",
