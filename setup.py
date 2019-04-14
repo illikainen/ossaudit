@@ -11,6 +11,8 @@ setup(
     author_email="hji@dyntopia.com",
     license="BSD-2-Clause",
     description="Audit python packages for known vulnerabilities",
+    long_description="See https://github.com/dyntopia/ossaudit",
+    url="https://github.com/dyntopia/ossaudit",
     python_requires=">=3.5",
     install_requires=[
         "click",
