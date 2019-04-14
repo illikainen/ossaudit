@@ -3,12 +3,12 @@
 # SPDX-License-Identifier: BSD-2-Clause
 
 from collections import namedtuple
-from typing import List
+from typing import Dict, Generator, List
 from urllib.parse import urljoin
 
 import requests
 
-from . import const, packages
+from . import cache, const, packages
 
 Vulnerability = namedtuple(
     "Vulnerability", [
@@ -28,39 +28,52 @@ class AuditError(Exception):
 
 
 def components(pkgs: List[packages.Package]) -> List[Vulnerability]:
-    if not pkgs:
-        return []
+    old = list(_from_cache(pkgs))
+    new = list(_from_api([
+        p for p in pkgs
+        if not any(p.coordinate == o.coordinate for o, _ in old)
+    ]))  # yapf: disable
+    return [
+        _transform(p, vuln)
+        for p, e in new + old
+        for vuln in e.get("vulnerabilities", [])
+    ]
 
+
+def _from_api(pkgs: List[packages.Package]) -> Generator:
     url = urljoin(const.API, const.COMPONENT_REPORT)
-    vulns = []
-
     for i in range(0, len(pkgs), const.MAX_PACKAGES):
         coordinates = [p.coordinate for p in pkgs[i:i + const.MAX_PACKAGES]]
         res = requests.post(url, json={"coordinates": coordinates})
 
         if res.status_code == 200:
-            for pkg in res.json():
-                name, version = next(
-                    ([p.name, p.version]
-                     for p in pkgs
-                     if p.coordinate == pkg.get("coordinates")),
-                    ["", ""],
-                )
-
-                for vuln in pkg.get("vulnerabilities", []):
-                    vulns.append(
-                        Vulnerability(
-                            name=name,
-                            version=version,
-                            id=vuln.get("id", ""),
-                            cve=vuln.get("cve", ""),
-                            cvss_score=vuln.get("cvssScore", ""),
-                            title=vuln.get("title", ""),
-                            description=vuln.get("description", ""),
-                        )
-                    )
+            for entry in res.json():
+                pkg = next((
+                    p for p in pkgs
+                    if p.coordinate == entry.get("coordinates")
+                ), packages.Package("unknown", "0"))
+                cache.save(entry)
+                yield (pkg, entry)
         elif res.status_code == 429:
             raise AuditError("too many requests")
         else:
             raise AuditError("unknown status code {}".format(res.status_code))
-    return vulns
+
+
+def _from_cache(pkgs: List[packages.Package]) -> Generator:
+    for pkg in pkgs:
+        entry = cache.get(pkg.coordinate)
+        if entry:
+            yield (pkg, entry)
+
+
+def _transform(pkg: packages.Package, vuln: Dict) -> Vulnerability:
+    return Vulnerability(
+        name=pkg.name,
+        version=pkg.version,
+        id=vuln.get("id", ""),
+        cve=vuln.get("cve", ""),
+        cvss_score=vuln.get("cvssScore", ""),
+        title=vuln.get("title", ""),
+        description=vuln.get("description", ""),
+    )

@@ -4,13 +4,31 @@
 
 import json
 import os
+import tempfile
+import time
+from pathlib import Path
+from typing import Dict, Optional
 from unittest import TestCase
 from unittest.mock import ANY, patch
 
 from ossaudit import audit, packages
 
 
-class TestComponents(TestCase):
+class AuditTestCase(TestCase):
+    def setUp(self) -> None:
+        self.tmpdir = tempfile.TemporaryDirectory()
+        self.cache = patch(
+            "ossaudit.const.CACHE",
+            Path(self.tmpdir.name).joinpath("cache.json"),
+        )
+        self.cache.start()
+
+    def tearDown(self) -> None:
+        self.cache.stop()
+        self.tmpdir.cleanup()
+
+
+class TestComponents(AuditTestCase):
     def test_ok(self) -> None:
         pkgs = [
             ("django", "2.2", ()),
@@ -71,8 +89,8 @@ class TestComponents(TestCase):
             vulns = audit.components([packages.Package("a", "1")])
 
             self.assertEqual(len(vulns), 1)
-            for value in vulns[0]._asdict().values():
-                self.assertEqual(value, "")
+            self.assertEqual(vulns[0].name, "unknown")
+            self.assertEqual(vulns[0].version, "0")
 
     def test_too_many_requests(self) -> None:
         with patch("requests.post") as mock:
@@ -87,3 +105,59 @@ class TestComponents(TestCase):
 
             with self.assertRaises(audit.AuditError):
                 audit.components([packages.Package("a", "1")])
+
+    def test_from_cache(self) -> None:
+        pkgs = [
+            packages.Package(n, v) for n, v in [
+                ("django", "2.2"),
+                ("pylint", "4.1"),
+                ("pyyaml", "3.13"),
+                ("requests", "0.10.0"),
+                ("yapf", "1.2.3"),
+            ]
+        ]
+
+        with patch("requests.post") as post:
+            post.return_value.status_code = 200
+
+            def getfun(coordinate: str) -> Optional[Dict]:
+                return {
+                    "coordinates": "pkg:pypi/pyyaml@3.13",
+                    "time": time.time(),
+                    "vulnerabilities": [{
+                        "id": "123",
+                    }]
+                } if coordinate == "pkg:pypi/pyyaml@3.13" else None
+
+            with patch("ossaudit.cache.get", wraps=getfun) as get:
+                with patch("ossaudit.const.MAX_PACKAGES", 1):
+                    vulns = audit.components(pkgs)
+
+                    self.assertEqual(len(vulns), 1)
+                    self.assertEqual(get.call_count, len(pkgs))
+                    self.assertEqual(post.call_count, len(pkgs) - 1)
+
+                    calls = [(ANY, {
+                        "json": {
+                            "coordinates": [p.coordinate]
+                        }
+                    }) for p in pkgs if p.coordinate != "pkg:pypi/pyyaml@3.13"]
+                    self.assertEqual(post.call_args_list, calls)
+
+    def test_save_cache(self) -> None:
+        pkgs = [
+            packages.Package(n, v) for n, v in [
+                ("django", "2.2"),
+                ("pyyaml", "3.13"),
+                ("requests", "0.10.0"),
+            ]
+        ]
+
+        with patch("requests.post") as post:
+            post.return_value.status_code = 200
+            with open(os.path.join("tests", "data", "vulns01.json")) as f:
+                post.return_value.json.return_value = json.load(f)
+
+            with patch("ossaudit.cache.save") as save:
+                audit.components(pkgs)
+                self.assertEqual(save.call_count, len(pkgs))
