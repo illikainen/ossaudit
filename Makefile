@@ -1,4 +1,4 @@
-.PHONY: all install install-dev test qa
+.PHONY: all dist install install-dev test qa
 
 all:
 
@@ -25,3 +25,18 @@ qa:
 	pyflakes .
 	pylint --output-format parseable setup.py ossaudit tests
 	yapf --diff --recursive .
+
+dist:
+	rm -rf dist tmp
+
+	tag="$$(git tag --sort=-creatordate |head -n 1)" && \
+	git verify-tag "$$tag" && \
+	git clone --shared --branch "$$tag" . tmp
+
+	cd tmp && \
+	./setup.py sdist && \
+	gpg --detach-sign --armor "$$(ls dist/*.tar.gz)"
+
+	mv tmp/dist .
+	rm -rf tmp
+	gpg --verify dist/*.asc
