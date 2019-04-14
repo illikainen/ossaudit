@@ -20,10 +20,18 @@ files.  The following formats are supported with [dparse][2]:
 
 ## Installation
 
+### Normal
+
+```sh
+pip install ossaudit
+```
+
+### Development
+
 Clone this repository and:
 
 ```sh
-make install
+make install-dev
 ```
 
 This installs `ossaudit` with `pip`.  Note that each dependency in
@@ -31,7 +39,7 @@ This installs `ossaudit` with `pip`.  Note that each dependency in
 tarball.  If you don't care about that you could simply:
 
 ```sh
-./setup.py install
+./setup.py develop
 ```
 
 
