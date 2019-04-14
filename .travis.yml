@@ -8,3 +8,6 @@ install:
   - make install-dev
 script:
   - make qa
+after_success:
+  - pip install codecov
+  - codecov
