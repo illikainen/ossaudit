@@ -50,11 +50,41 @@ $ ossaudit --help
 Usage: ossaudit [OPTIONS]
 
 Options:
+  -c, --config-file PATH
   -i, --installed
   -f, --file FILENAME
   --help               Show this message and exit.
 ```
 
 
+## Configuration
+
+[Appdirs][3] is used to determine storage paths.  This means that the
+location of the configuration file is platform-specific:
+
+- `*nix`: `~/.config/ossaudit/config.ini`
+- `macOS`: `~/Library/Preferences/ossaudit/config.ini`
+- `Windows`: `C:\Users\<username>\AppData\Local\ossaudit\ossaudit\config.ini`
+
+It can be overridden with the `--config-file` command-line argument and
+with the `OSSAUDIT_CONFIG_FILE` environment variable.
+
+Example configuration:
+
+```ini
+[ossaudit]
+# Optional: OSS Index username.
+username = string
+
+# Optional: OSS Index token
+token = string
+```
+
+Authentication is **not** required.  However, requests are rate limited
+and authenticated requests are less restricted.  A free account can be
+created on [OSS Index][1]
+
+
 [1]: https://ossindex.sonatype.org/
 [2]: https://github.com/pyupio/dparse
+[3]: https://github.com/ActiveState/appdirs
