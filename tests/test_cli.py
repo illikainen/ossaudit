@@ -3,11 +3,11 @@
 # SPDX-License-Identifier: BSD-2-Clause
 
 import tempfile
-from unittest.mock import patch
+from unittest.mock import ANY, patch
 
 from click.testing import CliRunner
 
-from ossaudit import audit, cli, packages
+from ossaudit import __project__, audit, cli, const, packages
 
 from .helpers import PatchedTestCase
 
@@ -31,7 +31,7 @@ class TestCli(PatchedTestCase):
             with patch("ossaudit.audit.components") as components:
                 result = runner.invoke(cli.cli, ["--installed"])
                 self.assertEqual(result.exit_code, 0)
-                components.assert_called_with(pkgs)
+                components.assert_called_with(pkgs, None, None)
 
     def test_files(self) -> None:
         runner = CliRunner()
@@ -47,7 +47,7 @@ class TestCli(PatchedTestCase):
                 with tempfile.NamedTemporaryFile() as tmp:
                     result = runner.invoke(cli.cli, ["--file", tmp.name])
                     self.assertEqual(result.exit_code, 0)
-                    components.assert_called_with(pkgs)
+                    components.assert_called_with(pkgs, None, None)
 
     def test_mixed(self) -> None:
         runner = CliRunner()
@@ -73,7 +73,24 @@ class TestCli(PatchedTestCase):
                             cli.cli, ["--installed", "--file", tmp.name]
                         )
                         self.assertEqual(result.exit_code, 0)
-                        components.assert_called_with(installed + files)
+                        components.assert_called_with(
+                            installed + files,
+                            None,
+                            None,
+                        )
+
+    def test_credentials(self) -> None:
+        with const.CONFIG.open("w") as f:
+            f.write("[{}]\n username=abc \n token=xyz".format(__project__))
+
+        runner = CliRunner()
+        with patch("ossaudit.packages.get_installed") as get_installed:
+            get_installed.return_value = [packages.Package("a", "1.1")]
+            with patch("ossaudit.audit.components") as components:
+                result = runner.invoke(cli.cli, ["--installed"])
+                print(result.output)
+                self.assertEqual(result.exit_code, 0)
+                components.assert_called_with(ANY, "abc", "xyz")
 
     def test_audit_error(self) -> None:
         with patch("ossaudit.packages.get_installed") as get_installed:
@@ -84,3 +101,11 @@ class TestCli(PatchedTestCase):
                 result = runner.invoke(cli.cli, ["--installed"])
                 self.assertTrue("xyz" in result.output)
                 self.assertNotEqual(result.exit_code, 0)
+
+    def test_config_error(self) -> None:
+        with const.CONFIG.open("w") as f:
+            f.write("...")
+
+        runner = CliRunner()
+        result = runner.invoke(cli.cli)
+        self.assertNotEqual(result.exit_code, 0)
