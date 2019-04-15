@@ -15,6 +15,7 @@ setup(
     url="https://github.com/dyntopia/ossaudit",
     python_requires=">=3.5",
     install_requires=[
+        "appdirs",
         "click",
         "dparse",
         "requests",
