@@ -39,6 +39,12 @@ class TestVersion(TestCase):
             self.assertEqual(v.base_version, sub)
 
 
+class TestCoordinate(TestCase):
+    def test_downcase(self) -> None:
+        p = packages.Package("NAMe", "1.2.3")
+        self.assertEqual(p.coordinate, "pkg:pypi/name@1.2.3")
+
+
 class TestGetFromFiles(TestCase):
     def test_requirements(self) -> None:
         pkgs = [

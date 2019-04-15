@@ -28,7 +28,7 @@ class Package:
     def coordinate(self) -> str:
         return "pkg:pypi/{name}@{version}".format(
             name=self.name, version=self.version
-        )
+        ).lower()
 
 
 class _Version(packaging.version.Version):  # type: ignore
