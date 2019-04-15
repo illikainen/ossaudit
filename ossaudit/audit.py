@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 
 from collections import namedtuple
-from typing import Dict, Generator, List
+from typing import Dict, Generator, List, Optional
 from urllib.parse import urljoin
 
 import requests
@@ -27,12 +27,16 @@ class AuditError(Exception):
     pass
 
 
-def components(pkgs: List[packages.Package]) -> List[Vulnerability]:
+def components(
+        pkgs: List[packages.Package],
+        username: Optional[str] = None,
+        token: Optional[str] = None,
+) -> List[Vulnerability]:
     old = list(_from_cache(pkgs))
     new = list(_from_api([
         p for p in pkgs
         if not any(p.coordinate == o.coordinate for o, _ in old)
-    ]))  # yapf: disable
+    ], username, token))  # yapf: disable
     return [
         _transform(p, vuln)
         for p, e in new + old
@@ -40,11 +44,17 @@ def components(pkgs: List[packages.Package]) -> List[Vulnerability]:
     ]
 
 
-def _from_api(pkgs: List[packages.Package]) -> Generator:
+def _from_api(
+        pkgs: List[packages.Package],
+        username: Optional[str] = None,
+        token: Optional[str] = None,
+) -> Generator:
     url = urljoin(const.API, const.COMPONENT_REPORT)
+    auth = (username, token) if username and token else None
+
     for i in range(0, len(pkgs), const.MAX_PACKAGES):
         coordinates = [p.coordinate for p in pkgs[i:i + const.MAX_PACKAGES]]
-        res = requests.post(url, json={"coordinates": coordinates})
+        res = requests.post(url, auth=auth, json={"coordinates": coordinates})
 
         if res.status_code == 200:
             for entry in res.json():
@@ -54,6 +64,8 @@ def _from_api(pkgs: List[packages.Package]) -> Generator:
                 ), packages.Package("unknown", "0"))
                 cache.save(entry)
                 yield (pkg, entry)
+        elif res.status_code == 401:
+            raise AuditError("invalid credentials")
         elif res.status_code == 429:
             raise AuditError("too many requests")
         else:

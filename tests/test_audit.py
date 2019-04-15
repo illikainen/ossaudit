@@ -60,7 +60,8 @@ class TestComponents(PatchedTestCase):
             calls = []
             for i in range(0, len(pkgs), max_packages):
                 coords = [p.coordinate for p in pkgs[i:i + max_packages]]
-                calls.append((ANY, {"json": {"coordinates": coords}}))
+                kw = {"auth": None, "json": {"coordinates": coords}}
+                calls.append((ANY, kw))
             self.assertEqual(mock.call_args_list, calls)
 
     def test_no_packages(self) -> None:
@@ -122,11 +123,14 @@ class TestComponents(PatchedTestCase):
                     self.assertEqual(get.call_count, len(pkgs))
                     self.assertEqual(post.call_count, len(pkgs) - 1)
 
-                    calls = [(ANY, {
-                        "json": {
-                            "coordinates": [p.coordinate]
+                    calls = [(
+                        ANY, {
+                            "auth": None,
+                            "json": {
+                                "coordinates": [p.coordinate]
+                            }
                         }
-                    }) for p in pkgs if p.coordinate != "pkg:pypi/pyyaml@3.13"]
+                    ) for p in pkgs if p.coordinate != "pkg:pypi/pyyaml@3.13"]
                     self.assertEqual(post.call_args_list, calls)
 
     def test_save_cache(self) -> None:
@@ -146,3 +150,31 @@ class TestComponents(PatchedTestCase):
             with patch("ossaudit.cache.save") as save:
                 audit.components(pkgs)
                 self.assertEqual(save.call_count, len(pkgs))
+
+    def test_invalid_credentials(self) -> None:
+        with patch("requests.post") as post:
+            post.return_value.status_code = 401
+            with self.assertRaises(audit.AuditError) as ctx:
+                audit.components([packages.Package("x", "1")])
+            self.assertTrue("credentials" in str(ctx.exception))
+
+    def test_credentials(self) -> None:
+        with patch("requests.post") as post:
+            post.return_value.status_code = 200
+            audit.components([packages.Package("x", "1")], "usr", "token")
+            calls = [(ANY, {"auth": ("usr", "token"), "json": ANY})]
+            self.assertEqual(post.call_args_list, calls)
+
+    def test_missing_username(self) -> None:
+        with patch("requests.post") as post:
+            post.return_value.status_code = 200
+            audit.components([packages.Package("x", "1")], None, "token")
+            calls = [(ANY, {"auth": None, "json": ANY})]
+            self.assertEqual(post.call_args_list, calls)
+
+    def test_missing_token(self) -> None:
+        with patch("requests.post") as post:
+            post.return_value.status_code = 200
+            audit.components([packages.Package("x", "1")], "usr", None)
+            calls = [(ANY, {"auth": None, "json": ANY})]
+            self.assertEqual(post.call_args_list, calls)
