@@ -4,7 +4,7 @@
 
 import configparser
 from pathlib import Path
-from typing import Optional
+from typing import List, Optional
 
 from . import __project__, const
 
@@ -21,6 +21,11 @@ class Config(configparser.ConfigParser):
     @property
     def token(self) -> Optional[str]:
         return self._get_optional("token")
+
+    @property
+    def columns(self) -> List[str]:
+        cols = self._get_optional("columns") or "name, version, title"
+        return [c.strip() for c in cols.split(",")]
 
     def _get_optional(self, option: str) -> Optional[str]:
         try:

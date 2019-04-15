@@ -62,3 +62,18 @@ class TestRead(TestCase):
 
         cfg = config.read()
         self.assertEqual(cfg.token, "abcd")
+
+    def test_missing_columns(self) -> None:
+        cfg = config.read()
+        columns = cfg.columns
+
+        self.assertTrue(len(columns))
+        for c in columns:
+            self.assertIsInstance(c, str)
+
+    def test_columns(self) -> None:
+        with const.CONFIG.open("w") as f:
+            f.write("[{}]\n columns =  aaa,  Bbb  , CCC\n".format(__project__))
+
+        cfg = config.read()
+        self.assertEqual(cfg.columns, ["aaa", "Bbb", "CCC"])

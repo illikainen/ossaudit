@@ -78,6 +78,11 @@ username = string
 
 # Optional: OSS Index token
 token = string
+
+# Optional: Comma-separated list of columns to show.
+# Default: name, version, title
+# Supported: id, name, version, cve, cvss_score, title, description
+columns = name, version, title
 ```
 
 Authentication is **not** required.  However, requests are rate limited

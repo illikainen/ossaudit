@@ -36,8 +36,10 @@ def cli(config_file: Path, installed: bool, files: List[IO]) -> None:
     if vulns:
         size = shutil.get_terminal_size()
         table = texttable.Texttable(max_width=size.columns)
-        table.header(vulns[0]._fields)
-        table.add_rows([v._asdict().values() for v in vulns], False)
+        table.header(cfg.columns)
+        table.add_rows([[getattr(v, c.lower(), "")
+                         for c in cfg.columns]
+                        for v in vulns], False)
         click.echo(table.draw())
         raise click.ClickException(
             "{} vulnerable package(s)".format(len(vulns))
