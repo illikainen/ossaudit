@@ -6,7 +6,8 @@ from . import __project__, cli
 
 
 def main() -> None:
-    cli.cli(auto_envvar_prefix=__project__)  # pylint: disable=E1120,E1123
+    prefix = __project__.upper()
+    cli.cli(auto_envvar_prefix=prefix)  # pylint: disable=E1120,E1123
 
 
 if __name__ == "__main__":
