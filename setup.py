@@ -32,5 +32,5 @@ setup(
         "yapf",
     ],
     packages=["ossaudit"],
-    entry_points={"console_scripts": ["ossaudit = ossaudit.cli:cli"]}
+    entry_points={"console_scripts": ["ossaudit = ossaudit.__main__:main"]}
 )

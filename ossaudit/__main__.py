@@ -2,7 +2,12 @@
 #
 # SPDX-License-Identifier: BSD-2-Clause
 
-from .cli import cli
+from . import __project__, cli
+
+
+def main() -> None:
+    cli.cli(auto_envvar_prefix=__project__)  # pylint: disable=E1120,E1123
+
 
 if __name__ == "__main__":
-    cli(None, None, None)
+    main()
