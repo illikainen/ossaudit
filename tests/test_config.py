@@ -7,7 +7,7 @@ from pathlib import Path
 from unittest import TestCase
 from unittest.mock import patch
 
-from ossaudit import config, const
+from ossaudit import __project__, config, const
 
 
 class TestRead(TestCase):
@@ -40,3 +40,25 @@ class TestRead(TestCase):
 
         with self.assertRaises(config.ConfigError):
             config.read()
+
+    def test_missing_username(self) -> None:
+        cfg = config.read()
+        self.assertIsNone(cfg.username)
+
+    def test_username(self) -> None:
+        with const.CONFIG.open("w") as f:
+            f.write("[{}]\n username=abcd".format(__project__))
+
+        cfg = config.read()
+        self.assertEqual(cfg.username, "abcd")
+
+    def test_missing_token(self) -> None:
+        cfg = config.read()
+        self.assertIsNone(cfg.token)
+
+    def test_token(self) -> None:
+        with const.CONFIG.open("w") as f:
+            f.write("[{}]\n token=abcd".format(__project__))
+
+        cfg = config.read()
+        self.assertEqual(cfg.token, "abcd")

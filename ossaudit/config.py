@@ -6,7 +6,7 @@ import configparser
 from pathlib import Path
 from typing import Optional
 
-from . import const
+from . import __project__, const
 
 
 class ConfigError(Exception):
@@ -14,7 +14,19 @@ class ConfigError(Exception):
 
 
 class Config(configparser.ConfigParser):
-    pass
+    @property
+    def username(self) -> Optional[str]:
+        return self._get_optional("username")
+
+    @property
+    def token(self) -> Optional[str]:
+        return self._get_optional("token")
+
+    def _get_optional(self, option: str) -> Optional[str]:
+        try:
+            return self.get(__project__, option)
+        except configparser.Error:
+            return None
 
 
 def read(path: Optional[Path] = None) -> Config:
