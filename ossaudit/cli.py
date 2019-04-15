@@ -39,3 +39,6 @@ def cli(config_file: Path, installed: bool, files: List[IO]) -> None:
         table.header(vulns[0]._fields)
         table.add_rows([v._asdict().values() for v in vulns], False)
         click.echo(table.draw())
+        raise click.ClickException(
+            "{} vulnerable package(s)".format(len(vulns))
+        )

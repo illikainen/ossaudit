@@ -29,6 +29,7 @@ class TestCli(PatchedTestCase):
         with patch("ossaudit.packages.get_installed") as get_installed:
             get_installed.return_value = pkgs
             with patch("ossaudit.audit.components") as components:
+                components.return_value = []
                 result = runner.invoke(cli.cli, ["--installed"])
                 self.assertEqual(result.exit_code, 0)
                 components.assert_called_with(pkgs, None, None)
@@ -44,6 +45,7 @@ class TestCli(PatchedTestCase):
         with patch("ossaudit.packages.get_from_files") as get_from_files:
             get_from_files.return_value = pkgs
             with patch("ossaudit.audit.components") as components:
+                components.return_value = []
                 with tempfile.NamedTemporaryFile() as tmp:
                     result = runner.invoke(cli.cli, ["--file", tmp.name])
                     self.assertEqual(result.exit_code, 0)
@@ -68,6 +70,7 @@ class TestCli(PatchedTestCase):
                 get_installed.return_value = installed
 
                 with patch("ossaudit.audit.components") as components:
+                    components.return_value = []
                     with tempfile.NamedTemporaryFile() as tmp:
                         result = runner.invoke(
                             cli.cli, ["--installed", "--file", tmp.name]
@@ -87,6 +90,7 @@ class TestCli(PatchedTestCase):
         with patch("ossaudit.packages.get_installed") as get_installed:
             get_installed.return_value = [packages.Package("a", "1.1")]
             with patch("ossaudit.audit.components") as components:
+                components.return_value = []
                 result = runner.invoke(cli.cli, ["--installed"])
                 self.assertEqual(result.exit_code, 0)
                 components.assert_called_with(ANY, "abc", "xyz")
@@ -108,3 +112,23 @@ class TestCli(PatchedTestCase):
         runner = CliRunner()
         result = runner.invoke(cli.cli)
         self.assertNotEqual(result.exit_code, 0)
+
+    def test_have_vulnerabilities(self) -> None:
+        vulns = [
+            audit.Vulnerability(*["..." for _ in audit.Vulnerability._fields])
+        ]
+        with patch("ossaudit.packages.get_installed"):
+            with patch("ossaudit.audit.components") as components:
+                components.return_value = vulns
+                runner = CliRunner()
+                result = runner.invoke(cli.cli, ["--installed"])
+                self.assertNotEqual(result.exit_code, 0)
+                self.assertTrue("1 vulnerable package(s)" in result.output)
+
+    def test_no_vulnerabilities(self) -> None:
+        with patch("ossaudit.packages.get_installed"):
+            with patch("ossaudit.audit.components") as components:
+                components.return_value = []
+                runner = CliRunner()
+                result = runner.invoke(cli.cli, ["--installed"])
+                self.assertEqual(result.exit_code, 0)
