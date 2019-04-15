@@ -88,7 +88,6 @@ class TestCli(PatchedTestCase):
             get_installed.return_value = [packages.Package("a", "1.1")]
             with patch("ossaudit.audit.components") as components:
                 result = runner.invoke(cli.cli, ["--installed"])
-                print(result.output)
                 self.assertEqual(result.exit_code, 0)
                 components.assert_called_with(ANY, "abc", "xyz")
 
