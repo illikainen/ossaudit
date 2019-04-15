@@ -4,31 +4,16 @@
 
 import json
 import os
-import tempfile
 import time
-from pathlib import Path
 from typing import Dict, Optional
-from unittest import TestCase
 from unittest.mock import ANY, patch
 
 from ossaudit import audit, packages
 
-
-class AuditTestCase(TestCase):
-    def setUp(self) -> None:
-        self.tmpdir = tempfile.TemporaryDirectory()
-        self.cache = patch(
-            "ossaudit.const.CACHE",
-            Path(self.tmpdir.name).joinpath("cache.json"),
-        )
-        self.cache.start()
-
-    def tearDown(self) -> None:
-        self.cache.stop()
-        self.tmpdir.cleanup()
+from .helpers import PatchedTestCase
 
 
-class TestComponents(AuditTestCase):
+class TestComponents(PatchedTestCase):
     def test_ok(self) -> None:
         pkgs = [
             ("django", "2.2", ()),

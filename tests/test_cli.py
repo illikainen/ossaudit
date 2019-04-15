@@ -3,15 +3,16 @@
 # SPDX-License-Identifier: BSD-2-Clause
 
 import tempfile
-from unittest import TestCase
 from unittest.mock import patch
 
 from click.testing import CliRunner
 
 from ossaudit import audit, cli, packages
 
+from .helpers import PatchedTestCase
 
-class TestCli(TestCase):
+
+class TestCli(PatchedTestCase):
     def test_run(self) -> None:
         runner = CliRunner()
         result = runner.invoke(cli.cli)
