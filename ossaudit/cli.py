@@ -13,9 +13,26 @@ from . import audit, config, packages
 
 
 @click.command()
-@click.option("--config-file", "-c", type=Path)
-@click.option("--installed", "-i", is_flag=True)
-@click.option("--file", "-f", "files", multiple=True, type=click.File())
+@click.option(
+    "--config-file",
+    "-c",
+    type=Path,
+    help="Configuration file.",
+)
+@click.option(
+    "--installed",
+    "-i",
+    is_flag=True,
+    help="Audit installed packages.",
+)
+@click.option(
+    "--file",
+    "-f",
+    "files",
+    multiple=True,
+    type=click.File(),
+    help="Audit packages in file (can be specified multiple times).",
+)
 def cli(config_file: Path, installed: bool, files: List[IO]) -> None:
     pkgs = []  # type: list
     if installed:

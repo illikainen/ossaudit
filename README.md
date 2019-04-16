@@ -50,10 +50,11 @@ $ ossaudit --help
 Usage: ossaudit [OPTIONS]
 
 Options:
-  -c, --config-file PATH
-  -i, --installed
-  -f, --file FILENAME
-  --help               Show this message and exit.
+  -c, --config-file PATH  Configuration file.
+  -i, --installed         Audit installed packages.
+  -f, --file FILENAME     Audit packages in file (can be specified multiple
+                          times).
+  --help                  Show this message and exit.
 ```
 
 
