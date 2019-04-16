@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 
 import shutil
+import sys
 from pathlib import Path
 from typing import IO, List
 
@@ -59,6 +60,7 @@ def cli(config_file: Path, installed: bool, files: List[IO]) -> None:
                          for c in cfg.columns]
                         for v in vulns], False)
         click.echo(table.draw())
-        raise click.ClickException(
-            "{} vulnerable package(s)".format(len(vulns))
-        )
+
+    vlen, plen = len(vulns), len(pkgs)
+    click.echo("Found {} vulnerabilities in {} packages".format(vlen, plen))
+    sys.exit(vlen != 0)

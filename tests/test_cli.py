@@ -123,7 +123,7 @@ class TestCli(PatchedTestCase):
                 runner = CliRunner()
                 result = runner.invoke(cli.cli, ["--installed"])
                 self.assertNotEqual(result.exit_code, 0)
-                self.assertTrue("1 vulnerable package(s)" in result.output)
+                self.assertTrue("1 vulnerabilities" in result.output)
 
     def test_no_vulnerabilities(self) -> None:
         with patch("ossaudit.packages.get_installed"):
@@ -132,3 +132,4 @@ class TestCli(PatchedTestCase):
                 runner = CliRunner()
                 result = runner.invoke(cli.cli, ["--installed"])
                 self.assertEqual(result.exit_code, 0)
+                self.assertTrue("0 vulnerabilities" in result.output)
