@@ -54,6 +54,7 @@ def cli(config_file: Path, installed: bool, files: List[IO]) -> None:
         size = shutil.get_terminal_size()
         table = texttable.Texttable(max_width=size.columns)
         table.header(cfg.columns)
+        table.set_cols_dtype(["t" for _ in range(len(cfg.columns))])
         table.add_rows([[getattr(v, c.lower(), "")
                          for c in cfg.columns]
                         for v in vulns], False)
