@@ -50,11 +50,16 @@ $ ossaudit --help
 Usage: ossaudit [OPTIONS]
 
 Options:
-  -c, --config-file PATH  Configuration file.
-  -i, --installed         Audit installed packages.
-  -f, --file FILENAME     Audit packages in file (can be specified multiple
-                          times).
-  --help                  Show this message and exit.
+  -c, --config CONFIG  Configuration file.  [default:
+                       /home/<user>/.config/ossaudit/config.ini]
+  -i, --installed      Audit installed packages.
+  -f, --file FILENAME  Audit packages in file (can be specified multiple
+                       times).
+  --username TEXT      Username for authentication.
+  --token TEXT         Token for authentication.
+  --column TEXT        Column to show (can be specified multiple times).
+                       [default: name, version, title]
+  --help               Show this message and exit.
 ```
 
 
@@ -67,8 +72,8 @@ location of the configuration file is platform-specific:
 - `macOS`: `~/Library/Preferences/ossaudit/config.ini`
 - `Windows`: `C:\Users\<username>\AppData\Local\ossaudit\ossaudit\config.ini`
 
-It can be overridden with the `--config-file` command-line argument and
-with the `OSSAUDIT_CONFIG_FILE` environment variable.
+It can be overridden with the `--config` command-line argument and with
+the `OSSAUDIT_CONFIG` environment variable.
 
 Example configuration:
 
