@@ -25,6 +25,9 @@ qa:
 	pyflakes .
 	pylint --output-format parseable setup.py ossaudit tests
 	yapf --diff --recursive .
+	ossaudit --installed \
+		--ignore-id 06e60262-8241-42ef-8f64-e3d72091de19 \
+		--ignore-id e4c955a3-2004-472e-920b-783fea46c3cd
 
 dist:
 	rm -rf dist tmp
