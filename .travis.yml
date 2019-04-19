@@ -4,6 +4,8 @@ python:
   - "3.5"
   - "3.6"
   - "3.7"
+before_install:
+  - pip uninstall -y -r <(pip freeze)
 install:
   - make install-dev
 script:
