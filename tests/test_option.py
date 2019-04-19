@@ -24,7 +24,7 @@ class TestOption(TestCase):
 
     def test_missing_config(self) -> None:
         @click.command()
-        @option.add("--config", type=option.Config, default="x", is_eager=True)
+        @option.add_config("--config", default="x")
         @option.add("--abcd")
         def fun(**kwargs: Any) -> None:
             self.assertIsNone(kwargs["abcd"])
@@ -36,7 +36,7 @@ class TestOption(TestCase):
 
     def test_invalid_config(self) -> None:
         @click.command()
-        @option.add("--config", type=option.Config, is_eager=True)
+        @option.add_config("--config")
         def fun(**_kwargs: Any) -> None:
             pass
 
@@ -51,7 +51,7 @@ class TestOption(TestCase):
 
     def test_with_config(self) -> None:
         @click.command()
-        @option.add("--config", type=option.Config, is_eager=True)
+        @option.add_config("--config")
         @option.add("--string")
         @option.add("--string-empty")
         @option.add("--multi-string", multiple=True)
@@ -104,9 +104,28 @@ class TestOption(TestCase):
             result = runner.invoke(fun, ["--config", "x.ini"])
             self.assertEqual(result.exit_code, 0)
 
+    def test_with_config_other_name(self) -> None:
+        @click.command()
+        @option.add_config("--xyz")
+        @option.add("--asdf")
+        def fun(**kwargs: Any) -> None:
+            self.assertEqual(kwargs["asdf"], "abcd")
+
+        runner = CliRunner()
+        with runner.isolated_filesystem():
+            with open("x.ini", "w") as f:
+                f.write(
+                    """
+                    [{}]
+                    asdf = abcd
+                    """.format(__project__)
+                )
+            result = runner.invoke(fun, ["--xyz", "x.ini"])
+            self.assertEqual(result.exit_code, 0)
+
     def test_with_config_and_overrides(self) -> None:
         @click.command()
-        @option.add("--config", type=option.Config, is_eager=True)
+        @option.add_config("--config")
         @option.add("--from-cfg")
         @option.add("--from-cfg-and-cli")
         @option.add("--from-cfg-and-env")

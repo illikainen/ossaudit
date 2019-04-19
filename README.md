@@ -50,8 +50,7 @@ $ ossaudit --help
 Usage: ossaudit [OPTIONS]
 
 Options:
-  -c, --config CONFIG  Configuration file.  [default:
-                       /home/<user>/.config/ossaudit/config.ini]
+  -c, --config TEXT    Configuration file.
   -i, --installed      Audit installed packages.
   -f, --file FILENAME  Audit packages in file (can be specified multiple
                        times).

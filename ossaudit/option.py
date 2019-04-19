@@ -4,15 +4,16 @@
 
 import configparser
 import re
-from pathlib import Path
-from typing import Any, Callable, Tuple, Union
+from typing import Any, Callable, Optional
 
 import click
 
-from . import __project__
+from . import __project__, const
 
 
 class Option(click.Option):
+    sep = re.compile(r"[\n\r,]")
+
     def full_process_value(self, ctx: click.Context, value: Any) -> Any:
         """
         Process a value.
@@ -27,24 +28,11 @@ class Option(click.Option):
         """
         if not value:
             name = self.name.replace("_", "-")
-            config = ctx.params.get("config")
-            value = config and config.get_value(name, self.multiple)
+            config = ctx.obj and ctx.obj.get("config")
+            value = config and config.get(__project__, name, fallback=None)
+            if value and self.multiple:
+                value = tuple(v.strip() for v in self.sep.split(value) if v)
         return super().full_process_value(ctx, value)
-
-
-class Config(configparser.ConfigParser):
-    def __init__(self, path: Path) -> None:
-        super().__init__()
-        try:
-            self.read(str(path))
-        except configparser.Error as e:
-            raise click.ClickException(str(e))
-
-    def get_value(self, name: str, multiple: bool) -> Union[str, Tuple, None]:
-        value = self.get(__project__, name, fallback=None)  # type: ignore
-        if value and multiple:
-            return tuple(v.strip() for v in re.split("[\n\r,]", value) if v)
-        return value
 
 
 def add(*param_decls: str, **attrs: Any) -> Callable:
@@ -52,3 +40,24 @@ def add(*param_decls: str, **attrs: Any) -> Callable:
     Add an option with the extended `Option` class.
     """
     return click.option(*param_decls, **attrs, cls=Option)  # type: ignore
+
+
+def add_config(*param_decls: str, **attrs: Any) -> Callable:
+    """
+    Add an unexposed option that initializes the configuration.
+    """
+
+    def cb(ctx: click.Context, _param: Option, value: Optional[str]) -> None:
+        value = value or str(const.CONFIG)
+        ctx.obj = ctx.obj or {}
+        ctx.obj["config"] = configparser.ConfigParser()
+        try:
+            ctx.obj["config"].read(value)
+        except configparser.Error as e:
+            raise click.ClickException(str(e))
+
+    attrs["callback"] = cb
+    attrs["expose_value"] = False
+    attrs["is_eager"] = True
+
+    return add(*param_decls, **attrs)

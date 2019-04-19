@@ -9,16 +9,13 @@ from typing import IO, List, Tuple
 import click
 import texttable
 
-from . import audit, const, option, packages
+from . import audit, option, packages
 
 
 @click.command()
-@option.add(
+@option.add_config(
     "--config",
     "-c",
-    default=const.CONFIG,
-    show_default=True,
-    type=option.Config,
     help="Configuration file.",
 )
 @option.add(
@@ -58,7 +55,6 @@ from . import audit, const, option, packages
     help="Ignore a vulnerability by ID (can be specified multiple times).",
 )
 def cli(
-        config: option.Config,  # pylint: disable=W0613
         installed: bool,
         files: List[IO[str]],
         username: str,
