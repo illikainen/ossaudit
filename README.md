@@ -59,6 +59,8 @@ Options:
   --token TEXT         Token for authentication.
   --column TEXT        Column to show (can be specified multiple times).
                        [default: name, version, title]
+  --ignore-id TEXT     Ignore a vulnerability by ID (can be specified multiple
+                       times).
   --help               Show this message and exit.
 ```
 
@@ -85,10 +87,13 @@ username = string
 # Optional: OSS Index token
 token = string
 
-# Optional: Comma-separated list of columns to show.
+# Optional: comma-separated list of columns to show.
 # Default: name, version, title
 # Supported: id, name, version, cve, cvss_score, title, description
 columns = name, version, title
+
+# Optional: comman-separated list of vulnerability IDs to ignore.
+ignore-ids = x,y,z
 ```
 
 Authentication is **not** required.  However, requests are rate limited

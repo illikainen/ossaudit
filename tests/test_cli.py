@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 
 import tempfile
+from functools import partial
 from unittest.mock import ANY, patch
 
 from click.testing import CliRunner
@@ -10,6 +11,12 @@ from click.testing import CliRunner
 from ossaudit import __project__, audit, cli, const, packages
 
 from .helpers import PatchedTestCase
+
+Vulnerability = partial(
+    audit.Vulnerability,
+    **{f: f
+       for f in audit.Vulnerability._fields},
+)
 
 
 class TestCli(PatchedTestCase):
@@ -114,12 +121,9 @@ class TestCli(PatchedTestCase):
         self.assertNotEqual(result.exit_code, 0)
 
     def test_have_vulnerabilities(self) -> None:
-        vulns = [
-            audit.Vulnerability(*["..." for _ in audit.Vulnerability._fields])
-        ]
         with patch("ossaudit.packages.get_installed"):
             with patch("ossaudit.audit.components") as components:
-                components.return_value = vulns
+                components.return_value = [Vulnerability()]
                 runner = CliRunner()
                 result = runner.invoke(cli.cli, ["--installed"])
                 self.assertNotEqual(result.exit_code, 0)
@@ -131,5 +135,47 @@ class TestCli(PatchedTestCase):
                 components.return_value = []
                 runner = CliRunner()
                 result = runner.invoke(cli.cli, ["--installed"])
+                self.assertEqual(result.exit_code, 0)
+                self.assertTrue("0 vulnerabilities" in result.output)
+
+    def test_ignore_some_ids_arg(self) -> None:
+        vulns = [
+            Vulnerability(id="0"),
+            Vulnerability(id="1"),
+            Vulnerability(id="2"),
+            Vulnerability(id="10"),
+            Vulnerability(id="20"),
+        ]
+
+        with patch("ossaudit.packages.get_installed"):
+            with patch("ossaudit.audit.components") as components:
+                components.return_value = vulns
+                runner = CliRunner()
+                args = ["--installed", "--ignore-id", "1", "--ignore-id", "20"]
+                result = runner.invoke(cli.cli, args)
+                self.assertNotEqual(result.exit_code, 0)
+                self.assertTrue("3 vulnerabilities" in result.output)
+
+    def test_ignore_all_ids_arg(self) -> None:
+        vulns = [
+            Vulnerability(id="0"),
+            Vulnerability(id="1"),
+            Vulnerability(id="2"),
+        ]
+
+        with patch("ossaudit.packages.get_installed"):
+            with patch("ossaudit.audit.components") as components:
+                components.return_value = vulns
+                runner = CliRunner()
+                args = [
+                    "--installed",
+                    "--ignore-id",
+                    "0",
+                    "--ignore-id",
+                    "1",
+                    "--ignore-id",
+                    "2",
+                ]
+                result = runner.invoke(cli.cli, args)
                 self.assertEqual(result.exit_code, 0)
                 self.assertTrue("0 vulnerabilities" in result.output)

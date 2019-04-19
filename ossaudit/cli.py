@@ -51,6 +51,12 @@ from . import audit, const, option, packages
     show_default=True,
     help="Column to show (can be specified multiple times).",
 )
+@option.add(
+    "--ignore-id",
+    "ignore_ids",
+    multiple=True,
+    help="Ignore a vulnerability by ID (can be specified multiple times).",
+)
 def cli(
         config: option.Config,  # pylint: disable=W0613
         installed: bool,
@@ -58,6 +64,7 @@ def cli(
         username: str,
         token: str,
         columns: Tuple[str],
+        ignore_ids: Tuple[str],
 ) -> None:
     pkgs = []  # type: list
     if installed:
@@ -66,7 +73,10 @@ def cli(
         pkgs += packages.get_from_files(files)
 
     try:
-        vulns = audit.components(pkgs, username, token)
+        vulns = [
+            v for v in audit.components(pkgs, username, token)
+            if v.id not in ignore_ids
+        ]
     except audit.AuditError as e:
         raise click.ClickException(str(e))
 
