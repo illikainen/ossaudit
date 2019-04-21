@@ -13,3 +13,13 @@ script:
 after_success:
   - pip install codecov
   - codecov
+
+jobs:
+  include:
+    - stage: test-sdist
+      install:
+        - ./setup.py sdist
+        - pip install dist/*.tar.gz
+      script:
+        - ossaudit --file requirements/requirements.txt
+      after_success: skip
