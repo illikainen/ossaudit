@@ -1,6 +1,6 @@
 # History
 
-## master
+## 0.4.0
 
 - Add support for ignoring vulnerabilities by ID.
 - Expose all configuration options as command-line arguments.
