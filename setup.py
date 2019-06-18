@@ -14,6 +14,12 @@ setup(
     long_description="See https://github.com/dyntopia/ossaudit",
     url="https://github.com/dyntopia/ossaudit",
     python_requires=">=3.5",
+    entry_points={
+        "console_scripts": ["ossaudit = ossaudit.__main__:main"],
+    },
+    packages=[
+        "ossaudit",
+    ],
     install_requires=[
         "appdirs",
         "click",
@@ -32,8 +38,6 @@ setup(
         "pylint-quotes",
         "yapf",
     ],
-    packages=["ossaudit"],
-    entry_points={"console_scripts": ["ossaudit = ossaudit.__main__:main"]},
     classifiers=[
         "Environment :: Console",
         "Intended Audience :: Developers",
