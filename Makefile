@@ -45,3 +45,8 @@ dist:
 	mv tmp/dist .
 	rm -rf tmp
 	gpg --verify dist/*.asc
+
+upload:
+	git push --tags
+	tag="$$(git tag --sort=-creatordate |head -n 1 |cut -dv -f2)" && \
+	twine upload dist/*$$tag.tar.gz
