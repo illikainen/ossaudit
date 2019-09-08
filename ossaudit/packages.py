@@ -30,6 +30,11 @@ class Package:
             name=self.name, version=self.version
         ).lower()
 
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, Package):
+            return other.coordinate == self.coordinate
+        return NotImplemented
+
 
 class _Version(packaging.version.Version):  # type: ignore
     def __iadd__(self, num: int) -> "_Version":
@@ -106,7 +111,7 @@ def get_from_files(fhs: List[IO[str]]) -> List[Package]:
     coordinate `pkg:pypi/django@1.7.2` gives a number of vulnerabilities
     that `pkg:pypi/django@1.7.2rc1` is missing.
     """
-    pkgs = []
+    pkgs = []  # type: List[Package]
     for f in fhs:
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", category=DeprecationWarning)
@@ -123,7 +128,9 @@ def get_from_files(fhs: List[IO[str]]) -> List[Package]:
                         version += 1
                     versions.append(version)
             version = min(versions or [_Version("0")])
-            pkgs.append(Package(dep.name, version.base_version))
+            pkg = Package(dep.name, version.base_version)
+            if pkg not in pkgs:
+                pkgs.append(pkg)
     return pkgs
 
 

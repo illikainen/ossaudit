@@ -1,5 +1,10 @@
 # History
 
+## master
+
+- Skip duplicates in the requirement files.
+
+
 ## 0.4.0
 
 - Add support for ignoring vulnerabilities by ID.

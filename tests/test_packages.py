@@ -149,6 +149,23 @@ class TestGetFromFiles(TestCase):
         want = ["pkg:pypi/{}".format(x) for x in [y for *_, y in r + p + t]]
         self.assertEqual(sorted(got), sorted(want))
 
+    def test_duplicates(self) -> None:
+        pkgs = [
+            ("django == 2.*", "django@2.0"),
+            ("django == 2.0", "django@2.0"),
+            ("mccabe == 9.9.9", "mccabe@9.9.9"),
+            ("mccabe == 7.0.0", "mccabe@7.0.0"),
+            ("munch == 1.2.3", "munch@1.2.3"),
+            ("munch == 1.2.3", "munch@1.2.3"),
+        ]
+
+        f = io.StringIO("\n".join(p for p, _ in pkgs))
+        f.name = "requirements.txt"
+
+        got = [p.coordinate for p in packages.get_from_files([f])]
+        want = list(set("pkg:pypi/{}".format(p) for _, p in pkgs))
+        self.assertEqual(sorted(got), sorted(want))
+
 
 class TestGetInstalled(TestCase):
     def test_installed(self) -> None:
@@ -168,3 +185,32 @@ class TestGetInstalled(TestCase):
             got = [p.coordinate for p in packages.get_installed()]
             want = ["pkg:pypi/{}".format(p) for *_, p in pkgs]
             self.assertEqual(sorted(got), sorted(want))
+
+
+class TestPackage(TestCase):
+    def test_eq(self) -> None:
+        p = packages.Package
+
+        self.assertTrue(p("name", "0") != p("name", "0.1"))
+        self.assertFalse(p("name", "0") == p("name", "0.1"))
+
+        self.assertTrue(p("name", "0") == p("name", "0"))
+        self.assertFalse(p("name", "0") != p("name", "0"))
+
+        self.assertTrue(p("a-b-c", "1.2.3") != p("a-b-d", "1.2.3"))
+        self.assertFalse(p("a-b-c", "1.2.3") == p("a-b-d", "1.2.3"))
+
+        self.assertTrue(p("a-b-c", "1.2.3") == p("a-b-c", "1.2.3"))
+        self.assertFalse(p("a-b-c", "1.2.3") != p("a-b-c", "1.2.3"))
+
+        self.assertTrue(p("a", "0") != "...")
+        self.assertFalse(p("a", "0") == "...")
+
+        self.assertTrue(p("a", "0") != "a")
+        self.assertFalse(p("a", "0") == "a")
+
+        self.assertTrue(p("a", "0") != "0")
+        self.assertFalse(p("a", "0") == "0")
+
+        self.assertTrue(p("a", "0") != p("a", "0").coordinate)
+        self.assertFalse(p("a", "0") == p("a", "0").coordinate)
