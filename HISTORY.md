@@ -1,8 +1,8 @@
 # History
 
-## master
+## 0.5.0
 
-- Skip duplicates in the requirement files.
+- Skip duplicate packages in the requirement files.
 
 
 ## 0.4.0
