@@ -1,5 +1,5 @@
-![Build Status](https://travis-ci.org/dyntopia/ossaudit.svg?branch=master)
-![Cov](https://codecov.io/github/dyntopia/ossaudit/coverage.svg?branch=master)
+![Build Status](https://travis-ci.org/illikainen/ossaudit.svg?branch=master)
+![Cov](https://codecov.io/github/illikainen/ossaudit/coverage.svg?branch=master)
 
 # ossaudit
 
