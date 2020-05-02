@@ -12,12 +12,18 @@ from . import const
 def get(coordinate: str) -> Optional[Dict]:
     if const.CACHE.exists():
         with const.CACHE.open() as f:
-            entry = next(
-                (e for e in json.load(f) if e["coordinates"] == coordinate),
-                {},
-            )
-            if _is_valid(entry):
-                return entry
+            try:
+                entry = next(
+                    (
+                        e for e in json.load(f)
+                        if e["coordinates"] == coordinate
+                    ),
+                    {},
+                )
+                if _is_valid(entry):
+                    return entry
+            except json.JSONDecodeError:
+                pass
     return None
 
 
@@ -26,10 +32,13 @@ def save(entry: Dict) -> None:
 
     if const.CACHE.exists():
         with const.CACHE.open() as f:
-            entries = [
-                e for e in json.load(f) if _is_valid(e)
-                and e.get("coordinates") != entry.get("coordinates")
-            ]
+            try:
+                entries = [
+                    e for e in json.load(f) if _is_valid(e)
+                    and e.get("coordinates") != entry.get("coordinates")
+                ]
+            except json.JSONDecodeError:
+                pass
     else:
         const.CACHE.parent.mkdir(parents=True, exist_ok=True)
 

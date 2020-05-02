@@ -4,6 +4,7 @@
 
 - Add `--reset-cache` to delete cached vulnerability data.
 - Add `--ignore-cache` to temporarily ignore cached vulnerability data.
+- Handle invalid JSON caches (by ignoring/overwriting them)
 
 
 ## 0.5.0

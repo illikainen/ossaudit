@@ -9,7 +9,7 @@ import tempfile
 import time
 from pathlib import Path
 from unittest import TestCase
-from unittest.mock import patch
+from unittest.mock import ANY, patch
 
 from ossaudit import cache, const
 
@@ -68,6 +68,12 @@ class TestGet(CacheTestCase):
 
         self.assertIsNone(entry)
 
+    def test_invalid_cache(self) -> None:
+        path = Path(self.tmp.name).joinpath("invalid.json")
+        path.write_text("abcd")
+        with patch("ossaudit.const.CACHE", path):
+            self.assertIsNone(cache.get("foo"))
+
 
 class TestSave(CacheTestCase):
     def test_mkdir(self) -> None:
@@ -118,6 +124,16 @@ class TestSave(CacheTestCase):
 
         self.assertEqual(len(updated), 2)
         self.assertNotEqual(updated[0]["time"], timestamp)
+
+    def test_ignore_invalid(self) -> None:
+        path = Path(self.tmp.name).joinpath("vulns01.json")
+        path.write_text("foo")
+
+        entry = {"coordinates": "abcd"}
+        with patch("ossaudit.const.CACHE", path):
+            cache.save(entry)
+            entry["time"] = ANY
+            self.assertEqual(cache.get("abcd"), entry)
 
 
 class TestReset(CacheTestCase):
