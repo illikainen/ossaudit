@@ -31,12 +31,13 @@ def components(
         pkgs: List[packages.Package],
         username: Optional[str] = None,
         token: Optional[str] = None,
+        ignore_cache: bool = False,
 ) -> List[Vulnerability]:
-    old = list(_from_cache(pkgs))
+    old = list(_from_cache(pkgs, ignore_cache))
     new = list(_from_api([
         p for p in pkgs
         if not any(p.coordinate == o.coordinate for o, _ in old)
-    ], username, token))  # yapf: disable
+    ], ignore_cache, username, token))  # yapf: disable
     return [
         _transform(p, vuln)
         for p, e in new + old
@@ -46,6 +47,7 @@ def components(
 
 def _from_api(
         pkgs: List[packages.Package],
+        ignore_cache: bool,
         username: Optional[str] = None,
         token: Optional[str] = None,
 ) -> Generator:
@@ -62,7 +64,8 @@ def _from_api(
                     p for p in pkgs
                     if p.coordinate == entry.get("coordinates")
                 ), packages.Package("unknown", "0"))
-                cache.save(entry)
+                if not ignore_cache:
+                    cache.save(entry)
                 yield (pkg, entry)
         elif res.status_code == 401:
             raise AuditError("invalid credentials")
@@ -72,11 +75,12 @@ def _from_api(
             raise AuditError("unknown status code {}".format(res.status_code))
 
 
-def _from_cache(pkgs: List[packages.Package]) -> Generator:
-    for pkg in pkgs:
-        entry = cache.get(pkg.coordinate)
-        if entry:
-            yield (pkg, entry)
+def _from_cache(pkgs: List[packages.Package], ignore_cache: bool) -> Generator:
+    if not ignore_cache:
+        for pkg in pkgs:
+            entry = cache.get(pkg.coordinate)
+            if entry:
+                yield (pkg, entry)
 
 
 def _transform(pkg: packages.Package, vuln: Dict) -> Vulnerability:

@@ -55,6 +55,11 @@ from . import audit, cache, option, packages
     help="Ignore a vulnerability by ID (can be specified multiple times).",
 )
 @option.add(
+    "--ignore-cache",
+    is_flag=True,
+    help="Temporarily ignore existing cache.",
+)
+@option.add(
     "--reset-cache",
     is_flag=True,
     help="Remove existing cache.",
@@ -66,6 +71,7 @@ def cli(
         token: str,
         columns: Tuple[str],
         ignore_ids: Tuple[str],
+        ignore_cache: bool,
         reset_cache: bool,
 ) -> None:
     if reset_cache:
@@ -79,7 +85,7 @@ def cli(
 
     try:
         vulns = [
-            v for v in audit.components(pkgs, username, token)
+            v for v in audit.components(pkgs, username, token, ignore_cache)
             if v.id not in ignore_ids
         ]
     except audit.AuditError as e:

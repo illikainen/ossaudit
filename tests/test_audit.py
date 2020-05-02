@@ -151,6 +151,65 @@ class TestComponents(PatchedTestCase):
                 audit.components(pkgs)
                 self.assertEqual(save.call_count, len(pkgs))
 
+    def test_from_ignored_cache(self) -> None:
+        pkgs = [
+            packages.Package(n, v) for n, v in [
+                ("django", "2.2"),
+                ("pylint", "4.1"),
+                ("pyyaml", "3.13"),
+                ("requests", "0.10.0"),
+                ("yapf", "1.2.3"),
+            ]
+        ]
+
+        with patch("requests.post") as post:
+            post.return_value.status_code = 200
+
+            def getfun(coordinate: str) -> Optional[Dict]:
+                return {
+                    "coordinates": "pkg:pypi/pyyaml@3.13",
+                    "time": time.time(),
+                    "vulnerabilities": [{
+                        "id": "123",
+                    }]
+                } if coordinate == "pkg:pypi/pyyaml@3.13" else None
+
+            with patch("ossaudit.cache.get", wraps=getfun) as get:
+                with patch("ossaudit.const.MAX_PACKAGES", 1):
+                    vulns = audit.components(pkgs, ignore_cache=True)
+
+                    self.assertEqual(len(vulns), 0)
+                    self.assertEqual(get.call_count, 0)
+                    self.assertEqual(post.call_count, len(pkgs))
+
+                    calls = [(
+                        ANY, {
+                            "auth": None,
+                            "json": {
+                                "coordinates": [p.coordinate]
+                            }
+                        }
+                    ) for p in pkgs]
+                    self.assertEqual(post.call_args_list, calls)
+
+    def test_dont_save_cache(self) -> None:
+        pkgs = [
+            packages.Package(n, v) for n, v in [
+                ("django", "2.2"),
+                ("pyyaml", "3.13"),
+                ("requests", "0.10.0"),
+            ]
+        ]
+
+        with patch("requests.post") as post:
+            post.return_value.status_code = 200
+            with open(os.path.join("tests", "data", "vulns01.json")) as f:
+                post.return_value.json.return_value = json.load(f)
+
+            with patch("ossaudit.cache.save") as save:
+                audit.components(pkgs, ignore_cache=True)
+                self.assertEqual(save.call_count, 0)
+
     def test_invalid_credentials(self) -> None:
         with patch("requests.post") as post:
             post.return_value.status_code = 401

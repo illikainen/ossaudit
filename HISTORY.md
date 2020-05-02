@@ -3,6 +3,7 @@
 ## 0.6.0 [rc]
 
 - Add `--reset-cache` to delete cached vulnerability data.
+- Add `--ignore-cache` to temporarily ignore cached vulnerability data.
 
 
 ## 0.5.0

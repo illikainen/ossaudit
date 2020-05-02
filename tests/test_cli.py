@@ -40,7 +40,7 @@ class TestCli(PatchedTestCase):
                 components.return_value = []
                 result = runner.invoke(cli.cli, ["--installed"])
                 self.assertEqual(result.exit_code, 0)
-                components.assert_called_with(pkgs, None, None)
+                components.assert_called_with(pkgs, None, None, False)
 
     def test_files(self) -> None:
         runner = CliRunner()
@@ -57,7 +57,7 @@ class TestCli(PatchedTestCase):
                 with tempfile.NamedTemporaryFile() as tmp:
                     result = runner.invoke(cli.cli, ["--file", tmp.name])
                     self.assertEqual(result.exit_code, 0)
-                    components.assert_called_with(pkgs, None, None)
+                    components.assert_called_with(pkgs, None, None, False)
 
     def test_mixed(self) -> None:
         runner = CliRunner()
@@ -88,6 +88,7 @@ class TestCli(PatchedTestCase):
                             installed + files,
                             None,
                             None,
+                            False,
                         )
 
     def test_credentials(self) -> None:
@@ -101,7 +102,7 @@ class TestCli(PatchedTestCase):
                 components.return_value = []
                 result = runner.invoke(cli.cli, ["--installed"])
                 self.assertEqual(result.exit_code, 0)
-                components.assert_called_with(ANY, "abc", "xyz")
+                components.assert_called_with(ANY, "abc", "xyz", False)
 
     def test_audit_error(self) -> None:
         with patch("ossaudit.packages.get_installed") as get_installed:
