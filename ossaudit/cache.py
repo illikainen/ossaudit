@@ -38,6 +38,11 @@ def save(entry: Dict) -> None:
         json.dump(entries + [entry], f)
 
 
+def reset() -> None:
+    if const.CACHE.exists():
+        const.CACHE.unlink()
+
+
 def _is_valid(entry: Dict) -> bool:
     then = entry.get("time", float("inf"))
     now = time.time()

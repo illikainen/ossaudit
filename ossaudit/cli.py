@@ -9,7 +9,7 @@ from typing import IO, List, Tuple
 import click
 import texttable
 
-from . import audit, option, packages
+from . import audit, cache, option, packages
 
 
 @click.command()
@@ -54,6 +54,11 @@ from . import audit, option, packages
     multiple=True,
     help="Ignore a vulnerability by ID (can be specified multiple times).",
 )
+@option.add(
+    "--reset-cache",
+    is_flag=True,
+    help="Remove existing cache.",
+)
 def cli(
         installed: bool,
         files: List[IO[str]],
@@ -61,7 +66,11 @@ def cli(
         token: str,
         columns: Tuple[str],
         ignore_ids: Tuple[str],
+        reset_cache: bool,
 ) -> None:
+    if reset_cache:
+        cache.reset()
+
     pkgs = []  # type: list
     if installed:
         pkgs += packages.get_installed()

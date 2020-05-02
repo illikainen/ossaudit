@@ -120,6 +120,25 @@ class TestSave(CacheTestCase):
         self.assertNotEqual(updated[0]["time"], timestamp)
 
 
+class TestReset(CacheTestCase):
+    def test_reset_exist(self) -> None:
+        path = Path(self.tmp.name).joinpath("cache.json")
+        path.touch()
+
+        self.assertTrue(path.exists())
+        with patch("ossaudit.const.CACHE", path):
+            cache.reset()
+        self.assertFalse(path.exists())
+
+    def test_reset_non_exist(self) -> None:
+        path = Path(self.tmp.name).joinpath("cache.json")
+
+        self.assertFalse(path.exists())
+        with patch("ossaudit.const.CACHE", path):
+            cache.reset()
+        self.assertFalse(path.exists())
+
+
 class TestIsValid(TestCase):
     def test_missing_time(self) -> None:
         self.assertFalse(cache._is_valid({}))

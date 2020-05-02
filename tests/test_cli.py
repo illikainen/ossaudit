@@ -4,6 +4,7 @@
 
 import tempfile
 from functools import partial
+from pathlib import Path
 from unittest.mock import ANY, patch
 
 from click.testing import CliRunner
@@ -179,3 +180,13 @@ class TestCli(PatchedTestCase):
                 result = runner.invoke(cli.cli, args)
                 self.assertEqual(result.exit_code, 0)
                 self.assertTrue("0 vulnerabilities" in result.output)
+
+    def test_reset_cache(self) -> None:
+        cache = Path(tempfile.NamedTemporaryFile(delete=False).name)
+
+        self.assertTrue(cache.exists())
+        with patch("ossaudit.const.CACHE", cache):
+            runner = CliRunner()
+            result = runner.invoke(cli.cli, ["--reset-cache"])
+            self.assertEqual(result.exit_code, 0)
+        self.assertFalse(cache.exists())

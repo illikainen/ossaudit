@@ -1,5 +1,10 @@
 # History
 
+## 0.6.0 [rc]
+
+- Add `--reset-cache` to delete cached vulnerability data.
+
+
 ## 0.5.0
 
 - Skip duplicate packages in the requirement files.
