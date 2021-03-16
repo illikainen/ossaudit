@@ -52,7 +52,7 @@ from . import audit, cache, option, packages
     "--ignore-id",
     "ignore_ids",
     multiple=True,
-    help="Ignore a vulnerability by ID (can be specified multiple times).",
+    help="Ignore a vulnerability by Sonatype ID or CVE (can be specified multiple times).",
 )
 @option.add(
     "--ignore-cache",
@@ -86,7 +86,7 @@ def cli(
     try:
         vulns = [
             v for v in audit.components(pkgs, username, token, ignore_cache)
-            if v.id not in ignore_ids
+            if v.id not in ignore_ids and v.cve not in ignore_ids
         ]
     except audit.AuditError as e:
         raise click.ClickException(str(e))

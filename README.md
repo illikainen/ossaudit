@@ -58,7 +58,7 @@ Options:
   --token TEXT         Token for authentication.
   --column TEXT        Column to show (can be specified multiple times).
                        [default: name, version, title]
-  --ignore-id TEXT     Ignore a vulnerability by ID (can be specified multiple
+  --ignore-id TEXT     Ignore a vulnerability by Sonatype ID or CVE (can be specified multiple
                        times).
   --help               Show this message and exit.
 ```
@@ -91,7 +91,7 @@ token = string
 # Supported: id, name, version, cve, cvss_score, title, description
 columns = name, version, title
 
-# Optional: comman-separated list of vulnerability IDs to ignore.
+# Optional: comman-separated list of vulnerability IDs (Sonatype ID or CVE) to ignore.
 ignore-ids = x,y,z
 ```
 
