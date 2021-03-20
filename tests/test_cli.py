@@ -145,24 +145,29 @@ class TestCli(PatchedTestCase):
             Vulnerability(id="0"),
             Vulnerability(id="1"),
             Vulnerability(id="2"),
-            Vulnerability(id="10"),
-            Vulnerability(id="20"),
+            Vulnerability(id="10", cve="CVE-10"),
+            Vulnerability(id="20", cve="CVE-20"),
+            Vulnerability(id="30", cve="CVE-30"),
+            Vulnerability(id="31", cve="CVE-31"),
+            Vulnerability(cve="CVE-32"),
         ]
 
         with patch("ossaudit.packages.get_installed"):
             with patch("ossaudit.audit.components") as components:
                 components.return_value = vulns
                 runner = CliRunner()
-                args = ["--installed", "--ignore-id", "1", "--ignore-id", "20"]
+                args = ["--installed", "--ignore-id", "1", "--ignore-id", "20", "--ignore-id", "CVE-30"]
                 result = runner.invoke(cli.cli, args)
                 self.assertNotEqual(result.exit_code, 0)
-                self.assertTrue("3 vulnerabilities" in result.output)
+                self.assertTrue("5 vulnerabilities" in result.output)
 
     def test_ignore_all_ids_arg(self) -> None:
         vulns = [
             Vulnerability(id="0"),
             Vulnerability(id="1"),
-            Vulnerability(id="2"),
+            Vulnerability(id="2", cve="CVE-2"),
+            Vulnerability(id="3", cve="CVE-3"),
+            Vulnerability(cve="CVE-4")
         ]
 
         with patch("ossaudit.packages.get_installed"):
@@ -177,6 +182,10 @@ class TestCli(PatchedTestCase):
                     "1",
                     "--ignore-id",
                     "2",
+                    "--ignore-id",
+                    "CVE-3",
+                    "--ignore-id",
+                    "CVE-4"
                 ]
                 result = runner.invoke(cli.cli, args)
                 self.assertEqual(result.exit_code, 0)
