@@ -156,7 +156,10 @@ class TestCli(PatchedTestCase):
             with patch("ossaudit.audit.components") as components:
                 components.return_value = vulns
                 runner = CliRunner()
-                args = ["--installed", "--ignore-id", "1", "--ignore-id", "20", "--ignore-id", "CVE-30"]
+                args = [
+                    "--installed", "--ignore-id", "1", "--ignore-id", "20",
+                    "--ignore-id", "CVE-30"
+                ]
                 result = runner.invoke(cli.cli, args)
                 self.assertNotEqual(result.exit_code, 0)
                 self.assertTrue("5 vulnerabilities" in result.output)
@@ -175,16 +178,8 @@ class TestCli(PatchedTestCase):
                 components.return_value = vulns
                 runner = CliRunner()
                 args = [
-                    "--installed",
-                    "--ignore-id",
-                    "0",
-                    "--ignore-id",
-                    "1",
-                    "--ignore-id",
-                    "2",
-                    "--ignore-id",
-                    "CVE-3",
-                    "--ignore-id",
+                    "--installed", "--ignore-id", "0", "--ignore-id", "1",
+                    "--ignore-id", "2", "--ignore-id", "CVE-3", "--ignore-id",
                     "CVE-4"
                 ]
                 result = runner.invoke(cli.cli, args)

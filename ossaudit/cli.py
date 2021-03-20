@@ -52,7 +52,10 @@ from . import audit, cache, option, packages
     "--ignore-id",
     "ignore_ids",
     multiple=True,
-    help="Ignore a vulnerability by Sonatype ID or CVE (can be specified multiple times).",
+    help=(
+        "Ignore a vulnerability by Sonatype ID or CVE "
+        "(can be specified multiple times)."
+    ),
 )
 @option.add(
     "--ignore-cache",
