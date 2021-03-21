@@ -58,8 +58,10 @@ Options:
   --token TEXT         Token for authentication.
   --column TEXT        Column to show (can be specified multiple times).
                        [default: name, version, title]
-  --ignore-id TEXT     Ignore a vulnerability by Sonatype ID or CVE (can be specified multiple
-                       times).
+  --ignore-id TEXT     Ignore a vulnerability by Sonatype ID or CVE (can be
+                       specified multiple times).
+  --ignore-cache       Temporarily ignore existing cache.
+  --reset-cache        Remove existing cache.
   --help               Show this message and exit.
 ```
 
