@@ -65,6 +65,18 @@ Options:
   --help               Show this message and exit.
 ```
 
+Possible column names are:
+* name (python package name)
+* version (python package version)
+* coordinate
+* id
+* cve (optional, might be emtpy)
+* cvss_score
+* cvss_vector
+* short_title
+* title
+* description
+* reference (url with further information on ossindex website)
 
 ## Configuration
 
