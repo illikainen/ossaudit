@@ -14,11 +14,16 @@ Vulnerability = namedtuple(
     "Vulnerability", [
         "name",
         "version",
+        "coordinate",
         "id",
         "cve",
         "cvss_score",
+        "cvss_vector",
+        "short_title",
         "title",
         "description",
+        "reference",
+        "external_references"
     ]
 )
 
@@ -88,8 +93,13 @@ def _transform(pkg: packages.Package, vuln: Dict) -> Vulnerability:
         name=pkg.name,
         version=pkg.version,
         id=vuln.get("id", ""),
+        coordinate=pkg.coordinate,
+        short_title=vuln.get("displayName", ""),
         cve=vuln.get("cve", ""),
         cvss_score=vuln.get("cvssScore", ""),
+        cvss_vector=vuln.get("cvssVector", ""),
         title=vuln.get("title", ""),
         description=vuln.get("description", ""),
+        reference=vuln.get("reference", ""),
+        external_references=vuln.get("externalReferences", [])
     )
