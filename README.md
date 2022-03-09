@@ -62,7 +62,10 @@ Options:
                        specified multiple times).
   --ignore-cache       Temporarily ignore existing cache.
   --reset-cache        Remove existing cache.
-  --help               Show this message and exit.
+  --json               Output vulnerabilities as json list
+  --json-full          Output all dependencies found and their vulnerabilities
+                       as json list (columns given are ignored)
+   --help               Show this message and exit.
 ```
 
 
